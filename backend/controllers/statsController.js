@@ -1,9 +1,9 @@
 const DailyStat = require("../models/DailyStat");
-const CommitLog = require("../models/commitLog");
-const Note = require("../models/note");
+const CommitLog = require("../models/CommitLog");
+const Note = require("../models/Note");
 const StudySession = require("../models/StudySession");
+const User = require("../models/User");
 const { calculateStreak } = require("../utils/streakCalculator");
-
 const {
   todayStr,
   startOfWeekStr,
@@ -45,6 +45,7 @@ async function getDashboardStats(req, res, next) {
     const totalCommits = commitLogs.reduce((s, c) => s + c.count, 0);
 
     const streak = calculateStreak(allDailyStats);
+    const user = await User.findById(userId).select("dailyGoalHours");
 
     res.json({
       todayStudySeconds: todayStat ? todayStat.totalStudySeconds : 0,
@@ -59,14 +60,12 @@ async function getDashboardStats(req, res, next) {
       longestSessionSeconds: longestSession
         ? longestSession.durationInSeconds
         : 0,
+      dailyGoalHours: user.dailyGoalHours,
     });
   } catch (err) {
     next(err);
   }
 }
-
-
-
 
 // GET /api/stats/weekly-chart
 // Last 7 days of study time, shaped for a bar chart on the frontend

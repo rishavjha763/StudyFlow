@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const protect = require("../middleware/auth");
-const { getXPSummary, getXPHistory } = require("../controllers/xpController");
+const { getAchievements } = require("../controllers/achievementController");
 
 router.use(protect);
-router.get("/summary", getXPSummary);
-router.get("/history", getXPHistory);
+router.get("/", getAchievements);
 
 module.exports = router;

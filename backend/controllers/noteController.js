@@ -1,4 +1,8 @@
-const Note = require("../models/note");
+const Note = require("../models/Note");
+const { awardXP } = require("../services/xpService");
+const {
+  checkAndUnlockAchievements,
+} = require("../services/achievementService");
 
 // GET /api/notes?search=keyword
 async function getNotes(req, res, next) {
@@ -28,7 +32,13 @@ async function createNote(req, res, next) {
       return res.status(400).json({ message: "Note title is required" });
 
     const note = await Note.create({ user: req.userId, title, description });
-    res.status(201).json({ note });
+    const xpResult = await awardXP(
+      req.userId,
+      "NOTE_CREATED",
+      "Created a note",
+    );
+    const newAchievements = await checkAndUnlockAchievements(req.userId);
+    res.status(201).json({ note, xp: xpResult, newAchievements });
   } catch (err) {
     next(err);
   }

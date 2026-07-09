@@ -1,6 +1,10 @@
 const StudySession = require("../models/StudySession");
 const DailyStat = require("../models/DailyStat");
 const { todayStr, startOfWeekStr } = require("../utils/dateHelpers");
+const { awardXP } = require("../services/xpService");
+const {
+  checkAndUnlockAchievements,
+} = require("../services/achievementService");
 
 // POST /api/timer/session
 // Called when the user hits "stop" on the timer, saves the finished session
@@ -33,7 +37,15 @@ async function saveSession(req, res, next) {
       { upsert: true, new: true },
     );
 
-    res.status(201).json({ session });
+    // Award XP for completing a study session (gamification)
+    const xpResult = await awardXP(
+      req.userId,
+      "STUDY_SESSION",
+      "Completed a study session",
+    );
+    const newAchievements = await checkAndUnlockAchievements(req.userId);
+
+    res.status(201).json({ session, xp: xpResult, newAchievements });
   } catch (err) {
     next(err);
   }

@@ -12,6 +12,9 @@ const userSchema = new mongoose.Schema(
     },
     password: { type: String, required: true }, // stored as a bcrypt hash, never plain text
     profileImage: { type: String, default: "" }, // relative path under /uploads/profile-images
+    xp: { type: Number, default: 0 },
+    level: { type: Number, default: 1 },
+    dailyGoalHours: { type: Number, default: 2 },
     createdDate: { type: Date, default: Date.now },
     // updatedAt is provided automatically by the timestamps option below
   },

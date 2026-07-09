@@ -1,4 +1,4 @@
-const CommitLog = require("../models/commitLog");
+const CommitLog = require("../models/CommitLog");
 const DailyStat = require("../models/DailyStat");
 const {
   todayStr,

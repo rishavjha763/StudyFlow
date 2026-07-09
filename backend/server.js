@@ -15,6 +15,9 @@ const topicRoutes = require("./routes/topicRoutes");
 const noteRoutes = require("./routes/noteRoutes");
 const statsRoutes = require("./routes/statsRoutes");
 const userRoutes = require("./routes/userRoutes");
+const xpRoutes = require("./routes/xpRoutes");
+const achievementRoutes = require("./routes/achievementRoutes");
+const quizRoutes = require("./routes/quizRoutes");
 
 const app = express();
 
@@ -51,6 +54,9 @@ app.use("/api/topics", topicRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/xp", xpRoutes);
+app.use("/api/achievements", achievementRoutes);
+app.use("/api/quizzes", quizRoutes);
 
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
