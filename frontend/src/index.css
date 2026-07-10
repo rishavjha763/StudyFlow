@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply font-sans antialiased;
+}
+
+/* Typography hierarchy: Manrope for anything UI/heading, Poppins for body/paragraph text */
+@layer base {
+  h1, h2, h3, h4, h5, h6,
+  button, label, nav,
+  .font-ui {
+    @apply font-heading;
+  }
+
+  p, span, li, td, th, input, textarea, select {
+    @apply font-sans;
+  }
+}
+
+.card {
+  @apply bg-white dark:bg-gray-900 rounded-2xl shadow-card hover:shadow-card-hover border border-gray-100 dark:border-gray-800 p-5 transition-all duration-200;
+}
+
+.btn-primary {
+  @apply bg-primary-600 hover:bg-primary-700 active:scale-[0.98] text-white font-medium px-4 py-2 rounded-lg transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 active:scale-[0.98] text-gray-800 dark:text-gray-100 font-medium px-4 py-2 rounded-lg transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none;
+}
+
+.input-field {
+  @apply w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow duration-150;
+}
+
+/* Skeleton loading shimmer, used while dashboard data is fetching */
+.skeleton {
+  @apply relative overflow-hidden bg-gray-100 dark:bg-gray-800 rounded-lg;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  animation: shimmer 1.5s infinite;
+}
+.dark .skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+}
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* Recharts renders its own inline SVG text elements that Tailwind's `dark:` variant
+   can't reach through className alone, so we target them directly here.
+   This is the fix for axis labels being unreadable (black-on-dark) in Dark Mode. */
+.recharts-cartesian-axis-tick text {
+  fill: #6b7280;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+}
+.dark .recharts-cartesian-axis-tick text {
+  fill: #9ca3af;
+}
+.recharts-tooltip-wrapper {
+  font-family: 'Poppins', sans-serif;
+}
