@@ -17,9 +17,9 @@ export default function QuickNotesWidget() {
   }
 
   useEffect(() => {
-    (async () => {
-      await fetchLatest();
-    })();
+    // defer invoking fetchLatest so state updates happen asynchronously and avoid
+    // synchronous setState inside the effect body
+    Promise.resolve().then(fetchLatest);
   }, []);
 
   async function handleAdd(e) {

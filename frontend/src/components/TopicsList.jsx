@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../services/api";
+import ConfirmModal from "./ConfirmModal";
 
 const STATUS_OPTIONS = ["Not Started", "In Progress", "Completed"];
 
@@ -17,6 +18,7 @@ const STATUS_STYLES = {
 export default function TopicsList() {
   const [topics, setTopics] = useState([]);
   const [newTopicName, setNewTopicName] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   async function fetchTopics() {
     const { data } = await api.get("/topics");
@@ -24,18 +26,9 @@ export default function TopicsList() {
   }
 
   useEffect(() => {
-    let cancelled = false;
     (async () => {
-      try {
-        const { data } = await api.get("/topics");
-        if (!cancelled) setTopics(data.topics);
-      } catch {
-        // ignore initial load errors
-      }
+      await fetchTopics();
     })();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   async function handleAddTopic(e) {
@@ -60,6 +53,7 @@ export default function TopicsList() {
   async function handleDelete(id) {
     setTopics((prev) => prev.filter((t) => t._id !== id));
     await api.delete(`/topics/${id}`);
+    setConfirmDeleteId(null);
   }
 
   return (
@@ -105,7 +99,7 @@ export default function TopicsList() {
                   {topic.status}
                 </span>
                 <button
-                  onClick={() => handleDelete(topic._id)}
+                  onClick={() => setConfirmDeleteId(topic._id)}
                   className="text-gray-400 hover:text-red-500"
                 >
                   <FiTrash2 size={15} />
@@ -165,6 +159,14 @@ export default function TopicsList() {
           </div>
         ))}
       </div>
+
+      <ConfirmModal
+        open={!!confirmDeleteId}
+        title="Delete this topic?"
+        message="Its progress and hours studied will be permanently removed."
+        onConfirm={() => handleDelete(confirmDeleteId)}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

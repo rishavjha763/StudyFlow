@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AppLayout from "../components/AppLayout";
 import StudyTimer from "../components/StudyTimer";
 import api from "../services/api";
@@ -13,22 +13,22 @@ export default function StudyTimerPage() {
   const [history, setHistory] = useState([]);
   const [summary, setSummary] = useState(null);
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     const [historyRes, summaryRes] = await Promise.all([
       api.get("/timer/history"),
       api.get("/timer/summary"),
     ]);
     setHistory(historyRes.data.history);
     setSummary(summaryRes.data);
-  }
+  }, []);
 
   useEffect(() => {
-    async function initialize() {
+    async function init() {
       await loadData();
     }
 
-    initialize();
-  }, []);
+    init();
+  }, [loadData]);
 
   return (
     <AppLayout section="Workspace" title="Focus Timer">

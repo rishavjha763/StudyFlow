@@ -9,6 +9,7 @@ import {
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../services/api";
+import ConfirmModal from "./ConfirmModal";
 
 export default function NotesList() {
   const [notes, setNotes] = useState([]);
@@ -17,6 +18,7 @@ export default function NotesList() {
   const [newNote, setNewNote] = useState({ title: "", description: "" });
   const [editingId, setEditingId] = useState(null);
   const [editValues, setEditValues] = useState({ title: "", description: "" });
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   async function fetchNotes(searchTerm = "") {
     const { data } = await api.get("/notes", {
@@ -27,8 +29,7 @@ export default function NotesList() {
 
   useEffect(() => {
     const loadNotes = async () => {
-      const { data } = await api.get("/notes");
-      setNotes(data.notes);
+      await fetchNotes();
     };
     loadNotes();
   }, []);
@@ -66,6 +67,7 @@ export default function NotesList() {
     await api.delete(`/notes/${id}`);
     fetchNotes(search);
     toast.success("Note deleted");
+    setConfirmDeleteId(null);
   }
 
   return (
@@ -180,7 +182,7 @@ export default function NotesList() {
                       <FiEdit2 size={14} />
                     </button>
                     <button
-                      onClick={() => handleDelete(note._id)}
+                      onClick={() => setConfirmDeleteId(note._id)}
                       className="text-gray-400 hover:text-red-500"
                     >
                       <FiTrash2 size={14} />
@@ -198,6 +200,14 @@ export default function NotesList() {
           </div>
         ))}
       </div>
+
+      <ConfirmModal
+        open={!!confirmDeleteId}
+        title="Delete this note?"
+        message="This can't be undone."
+        onConfirm={() => handleDelete(confirmDeleteId)}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

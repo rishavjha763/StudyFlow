@@ -15,16 +15,19 @@ import CommitCounter from "../components/CommitCounter";
 import StudyChart from "../components/StudyChart";
 import TopicsList from "../components/TopicsList";
 import QuickNotesWidget from "../components/QuickNotesWidget";
+import RevisionWidget from "../components/RevisionWidget";
+import { useFocusMode } from "../context/useFocusMode";
 import api from "../services/api";
 
 export default function DashboardPage() {
+  const { focusMode } = useFocusMode();
   const [stats, setStats] = useState(null);
   const [weeklyChart, setWeeklyChart] = useState([]);
   const [xpData, setXpData] = useState(null);
   const [achievements, setAchievements] = useState(null);
   const [quizStats, setQuizStats] = useState(null);
 
-  async function loadDashboard() {
+  async function loadDashboard(isMounted = () => true) {
     const [statsRes, chartRes, xpRes, achRes, quizRes] = await Promise.all([
       api.get("/stats/dashboard"),
       api.get("/stats/weekly-chart"),
@@ -32,6 +35,7 @@ export default function DashboardPage() {
       api.get("/achievements"),
       api.get("/quizzes/stats"),
     ]);
+    if (!isMounted()) return;
     setStats(statsRes.data);
     setWeeklyChart(chartRes.data.weeklyChart);
     setXpData(xpRes.data);
@@ -40,11 +44,14 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    async function fetchDashboard() {
-      await loadDashboard();
+    let mounted = true;
+    async function init() {
+      await loadDashboard(() => mounted);
     }
-
-    fetchDashboard();
+    init();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   async function handleExport() {
@@ -62,6 +69,20 @@ export default function DashboardPage() {
     hidden: { opacity: 0, y: 12 },
     show: { opacity: 1, y: 0 },
   };
+
+  // Focus Mode: hide every "unnecessary" dashboard widget (stats, commits,
+  // charts, notes, achievements) and show only the timer, centered and calm.
+  // This is also what fixes the Commits button being unresponsive in focus
+  // mode before — that whole multi-column grid simply doesn't render now.
+  if (focusMode) {
+    return (
+      <AppLayout section="Focus Mode" title="Deep work">
+        <div className="max-w-md mx-auto pt-8">
+          <StudyTimer onSessionSaved={() => {}} />
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout section="Workspace" title="Dashboard">
@@ -92,6 +113,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-2 space-y-6">
             <StudyChart data={weeklyChart} />
             <TopicsList />
+            <RevisionWidget />
           </div>
         </motion.div>
 

@@ -1,15 +1,15 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const quizResultSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    quiz: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz", required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    quiz: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz', required: true },
     quizTitle: { type: String, required: true }, // kept even if the quiz is later deleted
     score: { type: Number, required: true },
     totalQuestions: { type: Number, required: true },
-    date: { type: String, required: true }, // YYYY-MM-DD
+    date: { type: String, required: true } // YYYY-MM-DD
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
-module.exports = mongoose.model("QuizResult", quizResultSchema);
+module.exports = mongoose.model('QuizResult', quizResultSchema);

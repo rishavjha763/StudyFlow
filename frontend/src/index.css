@@ -72,3 +72,22 @@ body {
 .recharts-tooltip-wrapper {
   font-family: 'Poppins', sans-serif;
 }
+
+/* Subtle custom scrollbar — thin, rounded, matches the primary color on hover */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #10b981;
+}

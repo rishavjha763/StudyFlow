@@ -1,7 +1,7 @@
-const User = require("../models/User");
-const XPLog = require("../models/XPLog");
-const { getLevelInfo } = require("../utils/levelCalculator");
-const { todayStr } = require("../utils/dateHelpers");
+const User = require('../models/User');
+const XPLog = require('../models/XPLog');
+const { getLevelInfo } = require('../utils/levelCalculator');
+const { todayStr } = require('../utils/dateHelpers');
 
 // How much XP each action is worth, kept in one place so it's easy to tune later
 const XP_VALUES = {
@@ -9,7 +9,7 @@ const XP_VALUES = {
   NOTE_CREATED: 5,
   REVISION_COMPLETED: 10,
   QUIZ_COMPLETED: 15,
-  ACHIEVEMENT_UNLOCKED: 50,
+  ACHIEVEMENT_UNLOCKED: 50
 };
 
 // Call this any time a user does something XP-worthy.
@@ -18,12 +18,7 @@ async function awardXP(userId, reasonKey, reasonLabel) {
   const amount = XP_VALUES[reasonKey];
   if (!amount) return null;
 
-  await XPLog.create({
-    user: userId,
-    amount,
-    reason: reasonLabel,
-    date: todayStr(),
-  });
+  await XPLog.create({ user: userId, amount, reason: reasonLabel, date: todayStr() });
 
   const user = await User.findById(userId);
   const previousLevel = user.level;
@@ -37,7 +32,7 @@ async function awardXP(userId, reasonKey, reasonLabel) {
     xpAwarded: amount,
     totalXP: user.xp,
     level: user.level,
-    leveledUp: level > previousLevel,
+    leveledUp: level > previousLevel
   };
 }
 

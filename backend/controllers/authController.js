@@ -8,6 +8,23 @@ function generateToken(userId) {
   });
 }
 
+// Shapes the user object the same way everywhere a token is issued, so the
+// frontend always gets the full, current profile (including profileImage,
+// xp and level) — this is what was missing before, causing the profile
+// picture to disappear after logging back in.
+function toPublicUser(user) {
+  return {
+    id: user._id,
+    fullName: user.fullName,
+    email: user.email,
+    profileImage: user.profileImage,
+    xp: user.xp,
+    level: user.level,
+    dailyGoalHours: user.dailyGoalHours,
+    createdDate: user.createdDate,
+  };
+}
+
 // POST /api/auth/register
 async function register(req, res, next) {
   try {
@@ -42,16 +59,7 @@ async function register(req, res, next) {
 
     const token = generateToken(user._id);
 
-    res.status(201).json({
-      token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        profilePicture: user.profilePicture,
-        createdDate: user.createdDate,
-      },
-    });
+    res.status(201).json({ token, user: toPublicUser(user) });
   } catch (err) {
     next(err);
   }
@@ -80,16 +88,7 @@ async function login(req, res, next) {
 
     const token = generateToken(user._id);
 
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        profilePicture: user.profilePicture,
-        createdDate: user.createdDate,
-      },
-    });
+    res.json({ token, user: toPublicUser(user) });
   } catch (err) {
     next(err);
   }

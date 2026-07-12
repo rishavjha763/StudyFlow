@@ -35,7 +35,8 @@ export default function QuizPlayer({ quiz, onFinished, onExit }) {
         );
       }
       onFinished();
-    } catch {
+    } catch (err) {
+      console.error(err);
       toast.error("Could not submit quiz");
     } finally {
       setSubmitting(false);

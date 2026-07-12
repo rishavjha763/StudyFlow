@@ -7,11 +7,13 @@ const {
   deleteQuiz,
   submitQuiz,
   getQuizStats,
+  generateQuiz,
 } = require("../controllers/quizController");
 
 router.use(protect);
 router.get("/", getQuizzes);
 router.post("/", createQuiz);
+router.post("/generate", generateQuiz);
 router.get("/stats", getQuizStats);
 router.delete("/:id", deleteQuiz);
 router.post("/:id/submit", submitQuiz);
