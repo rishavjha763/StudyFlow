@@ -11,27 +11,31 @@ export default function QuizzesPage() {
   const [quizzes, setQuizzes] = useState([]);
   const [stats, setStats] = useState(null);
   const [topics, setTopics] = useState([]);
+  const [notes, setNotes] = useState([]);
   const [showBuilder, setShowBuilder] = useState(false);
   const [activeQuiz, setActiveQuiz] = useState(null);
-  const [selectedTopic, setSelectedTopic] = useState("");
+  const [selectedSource, setSelectedSource] = useState(""); // format: "topic:<name>" or "note:<title>"
   const [generating, setGenerating] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   async function loadData() {
-    const [quizRes, statsRes, topicsRes] = await Promise.all([
+    const [quizRes, statsRes, topicsRes, notesRes] = await Promise.all([
       api.get("/quizzes"),
       api.get("/quizzes/stats"),
       api.get("/topics"),
+      api.get("/notes"),
     ]);
     setQuizzes(quizRes.data.quizzes);
     setStats(statsRes.data);
     setTopics(topicsRes.data.topics);
+    setNotes(notesRes.data.notes);
   }
 
   useEffect(() => {
-    (async () => {
+    async function initialize() {
       await loadData();
-    })();
+    }
+    initialize();
   }, []);
 
   async function handleDelete(id) {
@@ -42,18 +46,19 @@ export default function QuizzesPage() {
   }
 
   async function handleGenerate() {
-    if (!selectedTopic) {
-      toast.error("Pick a topic first");
+    if (!selectedSource) {
+      toast.error("Pick a topic or note first");
       return;
     }
+    const [, name] = selectedSource.split(/:(.+)/); // split on the first colon only
     setGenerating(true);
     try {
       await api.post("/quizzes/generate", {
-        topicName: selectedTopic,
+        topicName: name,
         difficulty: "Medium",
       });
-      toast.success(`Quiz generated for ${selectedTopic}`);
-      setSelectedTopic("");
+      toast.success(`Quiz generated for ${name}`);
+      setSelectedSource("");
       loadData();
     } catch (err) {
       toast.error(err.response?.data?.message || "Could not generate quiz");
@@ -104,7 +109,7 @@ export default function QuizzesPage() {
           </div>
         </div>
 
-        {/* AI auto-generate from a studied topic */}
+        {/* AI auto-generate from a studied topic OR a note */}
         <div className="card bg-gradient-to-br from-primary-50 to-white dark:from-primary-500/10 dark:to-gray-900 border-primary-100 dark:border-primary-500/20">
           <div className="flex items-center gap-2 mb-1">
             <FiZap className="text-primary-600 dark:text-primary-400" />
@@ -113,20 +118,34 @@ export default function QuizzesPage() {
             </h3>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 font-sans">
-            Pick a topic and AI builds 5 questions to test yourself on it.
+            Pick a topic or one of your notes and AI builds 5 questions to test
+            yourself on it.
           </p>
           <div className="flex flex-col sm:flex-row gap-2">
             <select
-              value={selectedTopic}
-              onChange={(e) => setSelectedTopic(e.target.value)}
+              value={selectedSource}
+              onChange={(e) => setSelectedSource(e.target.value)}
               className="input-field sm:max-w-xs"
             >
-              <option value="">Select a topic...</option>
-              {topics.map((t) => (
-                <option key={t._id} value={t.name}>
-                  {t.name}
-                </option>
-              ))}
+              <option value="">Select a topic or note...</option>
+              {topics.length > 0 && (
+                <optgroup label="Topics">
+                  {topics.map((t) => (
+                    <option key={t._id} value={`topic:${t.name}`}>
+                      {t.name}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {notes.length > 0 && (
+                <optgroup label="Notes">
+                  {notes.map((n) => (
+                    <option key={n._id} value={`note:${n.title}`}>
+                      {n.title}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
             <button
               onClick={handleGenerate}
@@ -137,9 +156,9 @@ export default function QuizzesPage() {
               {generating ? "Generating..." : "Generate quiz"}
             </button>
           </div>
-          {topics.length === 0 && (
+          {topics.length === 0 && notes.length === 0 && (
             <p className="text-xs text-gray-400 mt-2 font-sans">
-              Add a topic on the Topics page first to generate a quiz from it.
+              Add a topic or a note first to generate a quiz from it.
             </p>
           )}
         </div>

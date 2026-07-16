@@ -1,6 +1,27 @@
 // Uses the Google Gemini API (free tier) to auto-generate a multiple-choice
-// quiz for a topic name. Requires GEMINI_API_KEY in backend/.env — get a
-// free key from https://aistudio.google.com/apikey
+// quiz for a topic or note title. Requires GEMINI_API_KEY in backend/.env —
+// get a free key from https://aistudio.google.com/apikey
+//
+// Google deprecates/retires Gemini model names fairly often. Instead of
+// hardcoding one and having it break again later, we try a short list of
+// candidates in order and use whichever one actually responds.
+const MODEL_CANDIDATES = [
+  "gemini-3.1-flash-lite",
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-flash",
+  "gemini-flash-latest",
+];
+
+async function callGemini(model, apiKey, prompt) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+  });
+  return response;
+}
+
 async function generateQuizQuestions(
   topicName,
   difficulty = "Medium",
@@ -20,39 +41,60 @@ Return ONLY a JSON array, with no other text before or after it, in exactly this
 [{"question": "...", "options": ["...", "...", "...", "..."], "correctIndex": 0}]
 Every question must have exactly 4 options. correctIndex is the 0-based index of the correct option.`;
 
-  const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-      }),
-    },
-  );
+  let response;
+  let lastErrorBody = "";
+
+  for (const model of MODEL_CANDIDATES) {
+    response = await callGemini(model, apiKey, prompt);
+    if (response.ok) break;
+
+    lastErrorBody = await response.text().catch(() => "");
+    // A 404 here means this particular model name is retired/unavailable —
+    // move on and try the next candidate. Any other error (bad key, quota,
+    // etc) won't be fixed by trying a different model, so stop immediately.
+    if (response.status !== 404) break;
+    console.warn(
+      `Gemini model "${model}" unavailable, trying next candidate...`,
+    );
+  }
 
   if (!response.ok) {
+    console.error("Gemini API error:", response.status, lastErrorBody);
     const err = new Error(
-      "Could not reach the AI quiz generator, please try again",
+      response.status === 400 || response.status === 403
+        ? "The AI service rejected the request — check that GEMINI_API_KEY in backend/.env is correct."
+        : "Could not reach the AI quiz generator, please try again",
     );
     err.statusCode = 502;
     throw err;
   }
 
   const data = await response.json();
-  const rawText = (data.candidates?.[0]?.content?.parts || [])
+  const candidate = data.candidates?.[0];
+
+  if (!candidate || candidate.finishReason === "SAFETY") {
+    const err = new Error(
+      "The AI could not generate questions for that topic, please try a different one",
+    );
+    err.statusCode = 502;
+    throw err;
+  }
+
+  const rawText = (candidate.content?.parts || [])
     .map((p) => p.text || "")
     .join("")
     .trim();
-  const cleaned = rawText.replace(/```json|```/g, "").trim();
+
+  const arrayMatch = rawText.match(/\[[\s\S]*\]/);
+  const jsonString = arrayMatch
+    ? arrayMatch[0]
+    : rawText.replace(/```json|```/g, "").trim();
 
   let questions;
   try {
-    questions = JSON.parse(cleaned);
+    questions = JSON.parse(jsonString);
   } catch (e) {
+    console.error("Gemini returned unparseable content:", rawText);
     const err = new Error(
       "The AI returned an unexpected format, please try again",
     );

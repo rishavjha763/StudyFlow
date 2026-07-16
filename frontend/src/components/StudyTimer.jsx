@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
 import { FiPlay, FiPause, FiSquare, FiRotateCcw } from "react-icons/fi";
-import toast from "react-hot-toast";
-import api from "../services/api";
+import { useTimer } from "../context/useTimer";
+import CelebrationModal from "./CelebrationModal";
 
 function formatTime(totalSeconds) {
   const h = Math.floor(totalSeconds / 3600);
@@ -10,82 +9,24 @@ function formatTime(totalSeconds) {
   return [h, m, s].map((n) => String(n).padStart(2, "0")).join(":");
 }
 
-// Study timer with start/pause/resume/stop/reset.
-// Uses Date.now() timestamps (not just setInterval counting) so the time stays
-// accurate even if the browser tab is backgrounded and throttles the interval.
+// This component is now just a "view" — all the actual timer state lives in
+// TimerContext (mounted once in main.jsx), so it keeps running correctly no
+// matter which page the user navigates to.
 export default function StudyTimer({ onSessionSaved }) {
-  const [status, setStatus] = useState("idle"); // idle | running | paused
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const startRef = useRef(null);
-  const accumulatedRef = useRef(0);
-  const sessionStartRef = useRef(null);
-  const intervalRef = useRef(null);
-
-  useEffect(() => {
-    if (status === "running") {
-      intervalRef.current = setInterval(() => {
-        const now = Date.now();
-        const secondsSinceStart = Math.floor((now - startRef.current) / 1000);
-        setElapsedSeconds(accumulatedRef.current + secondsSinceStart);
-      }, 1000);
-    }
-    return () => clearInterval(intervalRef.current);
-  }, [status]);
-
-  function handleStart() {
-    startRef.current = Date.now();
-    sessionStartRef.current = new Date();
-    accumulatedRef.current = 0;
-    setElapsedSeconds(0);
-    setStatus("running");
-  }
-
-  function handlePause() {
-    accumulatedRef.current = elapsedSeconds;
-    clearInterval(intervalRef.current);
-    setStatus("paused");
-  }
-
-  function handleResume() {
-    startRef.current = Date.now();
-    setStatus("running");
-  }
+  const {
+    status,
+    elapsedSeconds,
+    start,
+    pause,
+    resume,
+    stop,
+    reset,
+    leveledUp,
+    clearLevelUp,
+  } = useTimer();
 
   async function handleStop() {
-    clearInterval(intervalRef.current);
-    const finalSeconds = elapsedSeconds;
-    setStatus("idle");
-
-    if (finalSeconds < 1) {
-      setElapsedSeconds(0);
-      return;
-    }
-
-    try {
-      const { data } = await api.post("/timer/session", {
-        durationInSeconds: finalSeconds,
-        startedAt: sessionStartRef.current,
-        endedAt: new Date(),
-      });
-      toast.success(
-        `Saved a ${formatTime(finalSeconds)} study session (+${data.xp?.xpAwarded || 0} XP)`,
-      );
-      if (data.xp?.leveledUp) {
-        toast(`Level up! You're now level ${data.xp.level}`, { icon: "🎉" });
-      }
-      setElapsedSeconds(0);
-      accumulatedRef.current = 0;
-      onSessionSaved && onSessionSaved();
-    } catch {
-      toast.error("Could not save that session, please try again");
-    }
-  }
-
-  function handleReset() {
-    clearInterval(intervalRef.current);
-    accumulatedRef.current = 0;
-    setElapsedSeconds(0);
-    setStatus("idle");
+    await stop(onSessionSaved);
   }
 
   return (
@@ -103,7 +44,7 @@ export default function StudyTimer({ onSessionSaved }) {
       <div className="flex gap-3">
         {status === "idle" && (
           <button
-            onClick={handleStart}
+            onClick={start}
             className="btn-primary flex items-center gap-2"
           >
             <FiPlay /> Start
@@ -111,7 +52,7 @@ export default function StudyTimer({ onSessionSaved }) {
         )}
         {status === "running" && (
           <button
-            onClick={handlePause}
+            onClick={pause}
             className="btn-secondary flex items-center gap-2"
           >
             <FiPause /> Pause
@@ -119,7 +60,7 @@ export default function StudyTimer({ onSessionSaved }) {
         )}
         {status === "paused" && (
           <button
-            onClick={handleResume}
+            onClick={resume}
             className="btn-primary flex items-center gap-2"
           >
             <FiPlay /> Resume
@@ -135,13 +76,20 @@ export default function StudyTimer({ onSessionSaved }) {
         )}
         {status === "idle" && elapsedSeconds > 0 && (
           <button
-            onClick={handleReset}
+            onClick={reset}
             className="btn-secondary flex items-center gap-2"
           >
             <FiRotateCcw /> Reset
           </button>
         )}
       </div>
+
+      <CelebrationModal
+        open={!!leveledUp}
+        title={`Level up! You're level ${leveledUp}`}
+        message="Consistent studying is paying off. Keep the streak going."
+        onClose={clearLevelUp}
+      />
     </div>
   );
 }
