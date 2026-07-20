@@ -12,13 +12,27 @@ body {
 
 /* Typography hierarchy: Manrope for anything UI/heading, Poppins for body/paragraph text */
 @layer base {
-  h1, h2, h3, h4, h5, h6,
-  button, label, nav,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  button,
+  label,
+  nav,
   .font-ui {
     @apply font-heading;
   }
 
-  p, span, li, td, th, input, textarea, select {
+  p,
+  span,
+  li,
+  td,
+  th,
+  input,
+  textarea,
+  select {
     @apply font-sans;
   }
 }
@@ -44,18 +58,30 @@ body {
   @apply relative overflow-hidden bg-gray-100 dark:bg-gray-800 rounded-lg;
 }
 .skeleton::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
   animation: shimmer 1.5s infinite;
 }
 .dark .skeleton::after {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.06),
+    transparent
+  );
 }
 @keyframes shimmer {
-  100% { transform: translateX(100%); }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* Recharts renders its own inline SVG text elements that Tailwind's `dark:` variant
@@ -63,14 +89,14 @@ body {
    This is the fix for axis labels being unreadable (black-on-dark) in Dark Mode. */
 .recharts-cartesian-axis-tick text {
   fill: #6b7280;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 12px;
 }
 .dark .recharts-cartesian-axis-tick text {
   fill: #9ca3af;
 }
 .recharts-tooltip-wrapper {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 /* Subtle custom scrollbar — thin, rounded, matches the primary color on hover */
@@ -82,7 +108,7 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: #10b981 !important;
   border-radius: 999px;
 }
 .dark ::-webkit-scrollbar-thumb {
@@ -93,7 +119,9 @@ body {
 }
 
 .-translate-y-1\/2 {
-    --tw-translate-y: -50%;
-    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-    padding-right: 25px;
+  --tw-translate-y: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y))
+    rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y))
+    scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+  padding-right: 25px;
 }

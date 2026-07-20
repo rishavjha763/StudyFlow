@@ -20,6 +20,7 @@ const xpRoutes = require('./routes/xpRoutes');
 const achievementRoutes = require('./routes/achievementRoutes');
 const quizRoutes = require('./routes/quizRoutes');
 const revisionRoutes = require('./routes/revisionRoutes');
+const youtubeRoutes = require('./routes/youtubeRoutes');
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use('/api/xp', xpRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/revisions', revisionRoutes);
+app.use('/api/youtube', youtubeRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
