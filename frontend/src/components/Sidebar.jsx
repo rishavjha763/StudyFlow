@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaGraduationCap } from 'react-icons/fa';
 import {
-  FiGrid, FiClock, FiBookOpen, FiEdit3, FiBarChart2, FiAward, FiHelpCircle, FiUser, FiLogOut, FiX
+  FiGrid, FiClock, FiBookOpen, FiEdit3, FiBarChart2, FiAward, FiHelpCircle, FiUser, FiLogOut, FiX, FiRepeat
 } from 'react-icons/fi';
 import { useAuth } from '../context/useAuth';
 
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { to: '/study-timer', label: 'Focus Timer', icon: <FiClock /> },
   { to: '/topics', label: 'Topics', icon: <FiBookOpen /> },
   { to: '/notes', label: 'Notes', icon: <FiEdit3 /> },
+  { to: '/revision-hub', label: 'Revision Hub', icon: <FiRepeat /> },
   { to: '/analytics', label: 'Analytics', icon: <FiBarChart2 /> },
   { to: '/achievements', label: 'Achievements', icon: <FiAward /> },
   { to: '/quizzes', label: 'Quizzes', icon: <FiHelpCircle /> },
