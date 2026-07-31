@@ -4,11 +4,15 @@
 
 html {
   scroll-behavior: smooth;
+  
 }
 
 body {
   @apply font-sans antialiased;
 }
+
+
+
 
 /* Typography hierarchy: Manrope for anything UI/heading, Poppins for body/paragraph text */
 @layer base {
@@ -123,5 +127,5 @@ body {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y))
     rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y))
     scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-  padding-right: 25px;
+  padding-right: 17px;
 }

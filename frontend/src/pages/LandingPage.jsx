@@ -144,7 +144,7 @@ export default function LandingPage() {
       {/* ===== Hero ===== */}
       <main className="max-w-5xl mx-auto px-6 pt-16 pb-28 text-center relative">
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] pointer-events-none"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[700px] h-[400px]"
           style={{
             background:
               "radial-gradient(ellipse at center, rgba(16,185,129,0.16), transparent 70%)",

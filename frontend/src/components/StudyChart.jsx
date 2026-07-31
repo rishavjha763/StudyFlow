@@ -21,15 +21,15 @@ export default function StudyChart({ data }) {
           This week
         </h3>
       </div>
-      <div style={{ width: "100%", height: 220 }}>
-        <ResponsiveContainer>
+      <div className="w-full h-[220px]">
+        <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
             <CartesianGrid
               strokeDasharray="3 3"
               className="stroke-gray-100 dark:stroke-gray-800"
             />
             <XAxis dataKey="label" tickLine={false} axisLine={false} />
-            <YAxis tickLine={false} axisLine={false} unit="m" width={36} />
+            <YAxis tickLine={false} axisLine={false} unit="m" width={50} />
             <Tooltip
               formatter={(value) => [`${value} min`, "Studied"]}
               contentStyle={{
